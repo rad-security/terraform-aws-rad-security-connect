@@ -4,7 +4,7 @@ variable "rad-security_assumed_role_arn" {
   default     = "arn:aws:iam::955322216602:role/rad-security-connector"
 }
 
-variable "rad-security_depreceated_assumed_role_arn" {
+variable "rad-security_deprecated_assumed_role_arn" {
   type        = string
   description = "Deprecated Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account. This role will be removed in the future."
   default     = "arn:aws:iam::955322216602:role/ksoc-connector"

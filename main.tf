@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "assume_role" {
 
     principals {
       type        = "AWS"
-      identifiers = [var.rad-security_assumed_role_arn, var.rad-security_depreceated_assumed_role_arn]
+      identifiers = [var.rad-security_assumed_role_arn, var.rad-security_deprecated_assumed_role_arn]
     }
   }
 }
