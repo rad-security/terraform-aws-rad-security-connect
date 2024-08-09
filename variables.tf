@@ -45,3 +45,9 @@ variable "eks_audit_logs_multi_region" {
   default     = false
   description = "Enable multi-region support for the EKS audit logs. This requires creating subscription filters in each region outside of this module. See documentation for more information."
 }
+
+variable "tags" {
+  description = "A set of tags to associate with the resources in this module."
+  type        = map(string)
+  default     = {}
+}

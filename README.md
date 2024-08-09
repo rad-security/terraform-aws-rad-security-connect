@@ -90,6 +90,7 @@ No modules.
 | <a name="input_rad-security_assumed_role_arn"></a> [rad-security\_assumed\_role\_arn](#input\_rad-security\_assumed\_role\_arn) | Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account | `string` | `"arn:aws:iam::955322216602:role/rad-security-connector"` | no |
 | <a name="input_rad-security_deprecated_assumed_role_arn"></a> [rad-security\_deprecated\_assumed\_role\_arn](#input\_rad-security\_deprecated\_assumed\_role\_arn) | Deprecated Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account. This role will be removed in the future. | `string` | `"arn:aws:iam::955322216602:role/ksoc-connector"` | no |
 | <a name="input_rad-security_eks_audit_logs_assumed_role_arn"></a> [rad-security\_eks\_audit\_logs\_assumed\_role\_arn](#input\_rad-security\_eks\_audit\_logs\_assumed\_role\_arn) | Rad Security Role dedicated for EKS audit logs that will be allowed to assume | `string` | `"arn:aws:iam::955322216602:role/ksoc-data-pipeline"` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | A set of tags to associate with the resources in this module. | `map(string)` | `{}` | no |
 
 ## Outputs
 

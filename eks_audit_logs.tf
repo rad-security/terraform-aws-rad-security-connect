@@ -16,6 +16,7 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
   count       = var.enable_eks_audit_logs_pipeline ? 1 : 0
   name        = "ksoc-audit-logs"
   destination = "extended_s3"
+  tags        = var.tags
 
   extended_s3_configuration {
     role_arn   = aws_iam_role.firehose[0].arn
@@ -30,9 +31,9 @@ resource "aws_s3_bucket" "audit_logs" {
   count         = var.enable_eks_audit_logs_pipeline ? 1 : 0
   bucket        = local.bucket_name
   force_destroy = true
-  tags = {
+  tags = merge(var.tags, {
     ksoc-data-type = "eks-audit-logs"
-  }
+  })
 }
 
 resource "aws_s3_bucket_versioning" "audit_logs" {
@@ -77,6 +78,7 @@ resource "aws_iam_role" "firehose" {
     name   = "ksoc-firehose-to-s3-policy"
     policy = data.aws_iam_policy_document.firehose_to_s3[0].json
   }
+  tags = var.tags
 }
 
 data "aws_iam_policy_document" "cloudwatch_assume" {
@@ -110,6 +112,7 @@ resource "aws_iam_role" "cloudwatch" {
     name   = "ksoc-cloudwatch-logs-to-firehose-policy"
     policy = data.aws_iam_policy_document.logs_to_firehose[0].json
   }
+  tags = var.tags
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "subscription_filter" {
@@ -140,6 +143,7 @@ data "aws_iam_policy_document" "ksoc_s3_access" {
 resource "aws_iam_policy" "ksoc_s3_access" {
   count  = var.enable_eks_audit_logs_pipeline ? 1 : 0
   policy = data.aws_iam_policy_document.ksoc_s3_access[0].json
+  tags   = var.tags
 }
 
 data "aws_iam_policy_document" "ksoc_assume" {
@@ -160,6 +164,7 @@ resource "aws_iam_role" "ksoc_s3_access" {
   name                 = "ksoc-audit-logs"
   path                 = "/"
   max_session_duration = 3600
+  tags                 = var.tags
 
   assume_role_policy = data.aws_iam_policy_document.ksoc_assume[0].json
 }
