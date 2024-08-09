@@ -37,6 +37,7 @@ resource "aws_s3_bucket" "audit_logs" {
 }
 
 resource "aws_s3_bucket_public_access_block" "audit_logs" {
+  count  = var.enable_eks_audit_logs_pipeline ? 1 : 0
   bucket = aws_s3_bucket.audit_logs[0].id
 
   block_public_acls       = true
@@ -46,6 +47,7 @@ resource "aws_s3_bucket_public_access_block" "audit_logs" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "audit_logs" {
+  count  = var.enable_eks_audit_logs_pipeline ? 1 : 0
   bucket = aws_s3_bucket.audit_logs[0].id
   rule {
     apply_server_side_encryption_by_default {
