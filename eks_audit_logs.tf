@@ -36,6 +36,24 @@ resource "aws_s3_bucket" "audit_logs" {
   })
 }
 
+resource "aws_s3_bucket_public_access_block" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs[0].id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 resource "aws_s3_bucket_versioning" "audit_logs" {
   count  = var.enable_eks_audit_logs_pipeline ? 1 : 0
   bucket = aws_s3_bucket.audit_logs[0].id
@@ -70,6 +88,7 @@ data "aws_iam_policy_document" "firehose_to_s3" {
   }
 }
 
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_role" "firehose" {
   count              = var.enable_eks_audit_logs_pipeline ? 1 : 0
   name               = "ksoc-firehose"

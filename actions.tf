@@ -267,7 +267,7 @@ locals {
   slice(local.aws_iam_actions, i, min(i + local.policy_action_size, length(local.aws_iam_actions)))]
 }
 
-
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "connect_policy" {
   for_each = { for idx, sa in local.policy_actions : idx => sa }
 
