@@ -65,6 +65,8 @@ No modules.
 | [aws_iam_role_policy_attachment.rad-security_connect_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_kinesis_firehose_delivery_stream.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kinesis_firehose_delivery_stream) | resource |
 | [aws_s3_bucket.audit_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_public_access_block.audit_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_s3_bucket_server_side_encryption_configuration.audit_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_versioning.audit_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [rad-security_aws_register.this](https://registry.terraform.io/providers/rad-security/rad-security/latest/docs/resources/aws_register) | resource |
 | [random_id.uniq](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
@@ -90,6 +92,7 @@ No modules.
 | <a name="input_rad-security_assumed_role_arn"></a> [rad-security\_assumed\_role\_arn](#input\_rad-security\_assumed\_role\_arn) | Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account | `string` | `"arn:aws:iam::955322216602:role/rad-security-connector"` | no |
 | <a name="input_rad-security_deprecated_assumed_role_arn"></a> [rad-security\_deprecated\_assumed\_role\_arn](#input\_rad-security\_deprecated\_assumed\_role\_arn) | Deprecated Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account. This role will be removed in the future. | `string` | `"arn:aws:iam::955322216602:role/ksoc-connector"` | no |
 | <a name="input_rad-security_eks_audit_logs_assumed_role_arn"></a> [rad-security\_eks\_audit\_logs\_assumed\_role\_arn](#input\_rad-security\_eks\_audit\_logs\_assumed\_role\_arn) | Rad Security Role dedicated for EKS audit logs that will be allowed to assume | `string` | `"arn:aws:iam::955322216602:role/ksoc-data-pipeline"` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | A set of tags to associate with the resources in this module. | `map(string)` | `{}` | no |
 
 ## Outputs
 
