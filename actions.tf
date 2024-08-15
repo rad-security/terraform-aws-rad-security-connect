@@ -275,9 +275,7 @@ resource "aws_iam_policy" "connect_policy" {
   path        = "/"
   description = "Part ${each.key} of the policy required for rad-security-connect"
 
-  tags = {
-    app = "rad-security"
-  }
+  tags = var.tags
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -287,6 +285,7 @@ resource "aws_iam_policy" "connect_policy" {
       Resource = "*"
     }]
   })
+
 }
 
 resource "aws_iam_role_policy_attachment" "rad-security_connect_policy_attachment" {

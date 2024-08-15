@@ -11,6 +11,15 @@ data "aws_iam_policy_document" "assume_role" {
       type        = "AWS"
       identifiers = [var.rad-security_assumed_role_arn, var.rad-security_deprecated_assumed_role_arn]
     }
+
+    dynamic "condition" {
+      for_each = var.aws_external_id != "" ? [var.aws_external_id] : []
+      content {
+        test     = "StringEquals"
+        variable = "sts:ExternalId"
+        values   = [condition.value]
+      }
+    }
   }
 }
 
@@ -20,6 +29,7 @@ resource "aws_iam_role" "this" {
   path                 = "/"
   max_session_duration = 3600
   description          = "IAM role for rad-security-connect"
+  tags                 = var.tags
 
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }

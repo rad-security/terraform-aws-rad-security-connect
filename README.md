@@ -84,6 +84,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_aws_external_id"></a> [aws\_external\_id](#input\_aws\_external\_id) | External ID to use when connecting an AWS account with Rad | `string` | `""` | no |
 | <a name="input_eks_audit_logs_bucket_versioning_enabled"></a> [eks\_audit\_logs\_bucket\_versioning\_enabled](#input\_eks\_audit\_logs\_bucket\_versioning\_enabled) | Enable versioning for the S3 bucket that will store EKS audit logs | `bool` | `true` | no |
 | <a name="input_eks_audit_logs_filter_pattern"></a> [eks\_audit\_logs\_filter\_pattern](#input\_eks\_audit\_logs\_filter\_pattern) | The Cloudwatch Log Subscription Filter pattern | `string` | `"{ $.stage = \"ResponseComplete\" && $.requestURI != \"/version\" && $.requestURI != \"/version?*\" && $.requestURI != \"/metrics\" && $.requestURI != \"/metrics?*\" && $.requestURI != \"/logs\" && $.requestURI != \"/logs?*\" && $.requestURI != \"/swagger*\" && $.requestURI != \"/livez*\" && $.requestURI != \"/readyz*\" && $.requestURI != \"/healthz*\" }"` | no |
 | <a name="input_eks_audit_logs_multi_region"></a> [eks\_audit\_logs\_multi\_region](#input\_eks\_audit\_logs\_multi\_region) | Enable multi-region support for the EKS audit logs. This requires creating subscription filters in each region outside of this module. See documentation for more information. | `bool` | `false` | no |
