@@ -51,3 +51,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "aws_external_id" {
+  description = "External ID to use when connecting an AWS account with Rad"
+  type        = string
+  default     = ""
+}
