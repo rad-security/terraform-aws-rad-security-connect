@@ -4,7 +4,7 @@ The module allows you to connect your AWS account to Rad Security to allow them 
 
 ## Terraform Registry
 
-This module is available in the [Terraform Registry](https://registry.terraform.io/) see [here](https://registry.terraform.io/modules/ksoclabs/ksoc-connect/aws/latest). It uses the official Rad Security Provider to authenticate and connect your AWS account to KSOC. The KSOC Provider can be found here in the [Terraform Provider Registry](https://registry.terraform.io/providers/ksoclabs/ksoc/latest).
+This module is available in the [Terraform Registry](https://registry.terraform.io/) see [here](https://registry.terraform.io/modules/rad-security/rad-security-connect/aws/latest). It uses the official Rad Security Provider to authenticate and connect your AWS account to Rad Security. The Rad Security Provider can be found here in the [Terraform Provider Registry](https://registry.terraform.io/providers/rad-security/rad-security/latest).
 
 ## Contributing
 
@@ -16,17 +16,17 @@ Each PR merge into the `main` branch will execute the release process defined [h
 
 ## Usage
 
-This module requires you to obtain a set of cloud API credentials from KSOC (access_key/secret). It will use those credentials to connect your AWS account to your KSOC account.
+This module requires you to obtain a set of cloud API credentials from Rad Security (access_key/secret). It will use those credentials to connect your AWS account to your Rad Security account.
 
-The module needs an AWS provider to be configured. It will create an IAM Role in your account called `ksoc-connect`. The IAM Role has fine-grained policies attached (prefixed with `ksoc_connect_policy`), which will allow the `ksoc-connector` role in KSOC's AWS account to assume the permissions necessary to interact with AWS resources in your account.
+The module needs an AWS provider to be configured. It will create an IAM Role in your account called `rad-security-connect`. The IAM Role has fine-grained policies attached (prefixed with `rad-security_connect_policy`), which will allow the `rad-security-connector` role in Rad Security's AWS account to assume the permissions necessary to interact with AWS resources in your account.
 
-When the `ksoc-connect` Role is created, it will be added to your KSOC account through the `ksoc_aws_register` resource.
+When the `rad-security-connect` Role is created, it will be added to your Rad Security account through the `rad-security_aws_register` resource.
 
 ### EKS Audit Logs
 
-There is an optional flag `enable_eks_audit_logs_pipeline` which will create a CloudWatch Logs -> FireHose -> S3 pipeline for all EKS clusters in the account. This is required for KSOC to be able to analyse EKS audit logs. Make sure to enable EKS audit logs for EKS clusters you wish to be analysed. By default, the pipeline creates policy for CloudWatch in all four US regions. If you have EKS clusters in other regions, you can override the `eks_audit_logs_regions` variable.
+There is an optional flag `enable_eks_audit_logs_pipeline` which will create a CloudWatch Logs -> FireHose -> S3 pipeline for all EKS clusters in the account. This is required for Rad Security to be able to analyse EKS audit logs. Make sure to enable EKS audit logs for EKS clusters you wish to be analysed. By default, the pipeline creates policy for CloudWatch in all four US regions. If you have EKS clusters in other regions, you can override the `eks_audit_logs_regions` variable.
 
-Also, only clusters in the same region as your AWS provider will be included in the pipeline. If you have EKS clusters in multiple regions, you need to enable `eks_audit_logs_multi_region` flag and create subscription filters in each region outside of this module (see example in the [examples/audit_logs_multi_region](https://github.com/ksoclabs/terraform-aws-ksoc-connect/tree/main/examples/audit_logs_multi_region) directory).
+Also, only clusters in the same region as your AWS provider will be included in the pipeline. If you have EKS clusters in multiple regions, you need to enable `eks_audit_logs_multi_region` flag and create subscription filters in each region outside of this module (see example in the [examples/audit_logs_multi_region](https://github.com/rad-security/terraform-aws-rad-security-connect/tree/main/examples/audit_logs_multi_region) directory).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
