@@ -172,6 +172,7 @@ locals {
     "lambda:ListFunctionUrlConfigs",
     "lambda:ListFunctions",
     "lambda:ListProvisionedConcurrencyConfigs",
+    "lambda:ListTags",
     "lambda:ListVersionsByFunction",
     "lightsail:GetContainerServiceDeployments",
     "lightsail:GetContainerServices",
