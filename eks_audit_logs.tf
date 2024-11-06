@@ -170,8 +170,10 @@ resource "aws_iam_policy" "ksoc_s3_access" {
 data "aws_iam_policy_document" "ksoc_assume" {
   count = var.enable_eks_audit_logs_pipeline ? 1 : 0
   statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole", "sts:TagSession"
+    ]
 
     principals {
       type        = "AWS"
