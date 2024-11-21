@@ -28,6 +28,12 @@ variable "rad-security_eks_audit_logs_assumed_role_arn" {
   default     = "arn:aws:iam::955322216602:role/ksoc-data-pipeline"
 }
 
+variable "rad-security_role_name" {
+  type        = string
+  description = "The name of the IAM role that Rad Security will assume"
+  default     = "rad-security-connect"
+}
+
 variable "eks_audit_logs_filter_pattern" {
   type        = string
   default     = "{ $.stage = \"ResponseComplete\" && $.requestURI != \"/version\" && $.requestURI != \"/version?*\" && $.requestURI != \"/metrics\" && $.requestURI != \"/metrics?*\" && $.requestURI != \"/logs\" && $.requestURI != \"/logs?*\" && $.requestURI != \"/swagger*\" && $.requestURI != \"/livez*\" && $.requestURI != \"/readyz*\" && $.requestURI != \"/healthz*\" }"

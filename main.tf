@@ -25,10 +25,10 @@ data "aws_iam_policy_document" "assume_role" {
 
 # Role
 resource "aws_iam_role" "this" {
-  name                 = "rad-security-connect"
+  name                 = var.rad-security_role_name
   path                 = "/"
   max_session_duration = 3600
-  description          = "IAM role for rad-security-connect"
+  description          = "IAM role for Rad Security to connect to your AWS account"
   tags                 = var.tags
 
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
