@@ -40,10 +40,22 @@ variable "eks_audit_logs_regions" {
   description = "Regions from which Cloudwatch will be allowed to send logs to the Firehose"
 }
 
-variable "eks_audit_logs_multi_region" {
+variable "secondary_region" {
   type        = bool
+  description = "Enable this if running in a another region. It will disable the creation of global resources."
   default     = false
-  description = "Enable multi-region support for the EKS audit logs. This requires creating subscription filters in each region outside of this module. See documentation for more information."
+}
+
+variable "firehose_role_arn" {
+  type        = string
+  description = "The ARN of the IAM role that will be used to write to the Firehose"
+  default     = ""
+}
+
+variable "cloudwatch_role_arn" {
+  type        = string
+  description = "The ARN of the IAM role that CloudWatch Logs will use to send data to the Firehose. Required for secondary regions."
+  default     = ""
 }
 
 variable "tags" {

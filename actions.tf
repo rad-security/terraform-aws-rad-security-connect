@@ -272,7 +272,7 @@ locals {
 
   policy_action_size = ceil(length(local.aws_iam_actions) / local.number_of_iam_policies)
 
-  policy_actions = [for i in range(0, length(local.aws_iam_actions), local.policy_action_size) :
+  policy_actions = var.secondary_region ? [] : [for i in range(0, length(local.aws_iam_actions), local.policy_action_size) :
   slice(local.aws_iam_actions, i, min(i + local.policy_action_size, length(local.aws_iam_actions)))]
 }
 
@@ -300,6 +300,6 @@ resource "aws_iam_policy" "connect_policy" {
 resource "aws_iam_role_policy_attachment" "rad-security_connect_policy_attachment" {
   for_each = aws_iam_policy.connect_policy
 
-  role       = aws_iam_role.this.name
+  role       = aws_iam_role.this[0].name
   policy_arn = each.value.arn
 }

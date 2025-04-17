@@ -19,7 +19,7 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
   tags        = var.tags
 
   extended_s3_configuration {
-    role_arn   = aws_iam_role.firehose[0].arn
+    role_arn   = var.firehose_role_arn != "" ? var.firehose_role_arn : one(aws_iam_role.firehose[*].arn)
     bucket_arn = aws_s3_bucket.audit_logs[0].arn
 
     buffering_interval = 60
@@ -65,7 +65,7 @@ resource "aws_s3_bucket_versioning" "audit_logs" {
 }
 
 data "aws_iam_policy_document" "firehose_assume" {
-  count = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "firehose_assume" {
 }
 
 data "aws_iam_policy_document" "firehose_to_s3" {
-  count = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -92,7 +92,7 @@ data "aws_iam_policy_document" "firehose_to_s3" {
 
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_role" "firehose" {
-  count              = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count              = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   name               = "ksoc-firehose"
   assume_role_policy = data.aws_iam_policy_document.firehose_assume[0].json
   inline_policy {
@@ -103,7 +103,7 @@ resource "aws_iam_role" "firehose" {
 }
 
 data "aws_iam_policy_document" "cloudwatch_assume" {
-  count = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -117,7 +117,7 @@ data "aws_iam_policy_document" "cloudwatch_assume" {
 }
 
 data "aws_iam_policy_document" "logs_to_firehose" {
-  count = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect    = "Allow"
     actions   = ["firehose:PutRecord"]
@@ -126,7 +126,7 @@ data "aws_iam_policy_document" "logs_to_firehose" {
 }
 
 resource "aws_iam_role" "cloudwatch" {
-  count              = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count              = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   name               = "ksoc-cloudwatch-logs"
   assume_role_policy = data.aws_iam_policy_document.cloudwatch_assume[0].json
   inline_policy {
@@ -137,12 +137,12 @@ resource "aws_iam_role" "cloudwatch" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "subscription_filter" {
-  for_each = var.enable_eks_audit_logs_pipeline && !var.eks_audit_logs_multi_region ? {
+  for_each = var.enable_eks_audit_logs_pipeline ? {
     for name in data.aws_cloudwatch_log_groups.eks[0].log_group_names : name => name
   } : {}
 
   name            = "ksoc-audit-logs"
-  role_arn        = aws_iam_role.cloudwatch[0].arn
+  role_arn        = var.cloudwatch_role_arn != "" ? var.cloudwatch_role_arn : one(aws_iam_role.cloudwatch[*].arn)
   log_group_name  = each.key
   filter_pattern  = var.eks_audit_logs_filter_pattern
   destination_arn = aws_kinesis_firehose_delivery_stream.firehose[0].arn
@@ -151,7 +151,7 @@ resource "aws_cloudwatch_log_subscription_filter" "subscription_filter" {
 
 # Cross-account connectivity.
 data "aws_iam_policy_document" "ksoc_s3_access" {
-  count = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -162,13 +162,13 @@ data "aws_iam_policy_document" "ksoc_s3_access" {
 }
 
 resource "aws_iam_policy" "ksoc_s3_access" {
-  count  = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count  = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   policy = data.aws_iam_policy_document.ksoc_s3_access[0].json
   tags   = var.tags
 }
 
 data "aws_iam_policy_document" "ksoc_assume" {
-  count = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -192,7 +192,7 @@ data "aws_iam_policy_document" "ksoc_assume" {
 }
 
 resource "aws_iam_role" "ksoc_s3_access" {
-  count                = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count                = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   name                 = "ksoc-audit-logs"
   path                 = "/"
   max_session_duration = 3600
@@ -202,7 +202,7 @@ resource "aws_iam_role" "ksoc_s3_access" {
 }
 
 resource "aws_iam_role_policy_attachment" "ksoc_s3_access" {
-  count      = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  count      = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   role       = aws_iam_role.ksoc_s3_access[0].name
   policy_arn = aws_iam_policy.ksoc_s3_access[0].arn
 }

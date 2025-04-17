@@ -85,14 +85,16 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_external_id"></a> [aws\_external\_id](#input\_aws\_external\_id) | External ID to use when connecting an AWS account with Rad | `string` | `""` | no |
+| <a name="input_cloudwatch_role_arn"></a> [cloudwatch\_role\_arn](#input\_cloudwatch\_role\_arn) | The ARN of the IAM role that CloudWatch Logs will use to send data to the Firehose. Required for secondary regions. | `string` | `""` | no |
 | <a name="input_eks_audit_logs_bucket_versioning_enabled"></a> [eks\_audit\_logs\_bucket\_versioning\_enabled](#input\_eks\_audit\_logs\_bucket\_versioning\_enabled) | Enable versioning for the S3 bucket that will store EKS audit logs | `bool` | `true` | no |
 | <a name="input_eks_audit_logs_filter_pattern"></a> [eks\_audit\_logs\_filter\_pattern](#input\_eks\_audit\_logs\_filter\_pattern) | The Cloudwatch Log Subscription Filter pattern | `string` | `"{ $.stage = \"ResponseComplete\" && $.requestURI != \"/version\" && $.requestURI != \"/version?*\" && $.requestURI != \"/metrics\" && $.requestURI != \"/metrics?*\" && $.requestURI != \"/logs\" && $.requestURI != \"/logs?*\" && $.requestURI != \"/swagger*\" && $.requestURI != \"/livez*\" && $.requestURI != \"/readyz*\" && $.requestURI != \"/healthz*\" }"` | no |
-| <a name="input_eks_audit_logs_multi_region"></a> [eks\_audit\_logs\_multi\_region](#input\_eks\_audit\_logs\_multi\_region) | Enable multi-region support for the EKS audit logs. This requires creating subscription filters in each region outside of this module. See documentation for more information. | `bool` | `false` | no |
-| <a name="input_eks_audit_logs_regions"></a> [eks\_audit\_logs\_regions](#input\_eks\_audit\_logs\_regions) | Regions from which Cloudwatch will be allowed to send logs to the Firehose | `list(string)` | <pre>[<br>  "us-east-1",<br>  "us-east-2",<br>  "us-west-1",<br>  "us-west-2"<br>]</pre> | no |
+| <a name="input_eks_audit_logs_regions"></a> [eks\_audit\_logs\_regions](#input\_eks\_audit\_logs\_regions) | Regions from which Cloudwatch will be allowed to send logs to the Firehose | `list(string)` | <pre>[<br/>  "us-east-1",<br/>  "us-east-2",<br/>  "us-west-1",<br/>  "us-west-2"<br/>]</pre> | no |
 | <a name="input_enable_eks_audit_logs_pipeline"></a> [enable\_eks\_audit\_logs\_pipeline](#input\_enable\_eks\_audit\_logs\_pipeline) | Enable EKS Audit Logs Pipeline (CloudWatch Logs -> FireHose -> S3) | `bool` | `false` | no |
+| <a name="input_firehose_role_arn"></a> [firehose\_role\_arn](#input\_firehose\_role\_arn) | The ARN of the IAM role that will be used to write to the Firehose | `string` | `""` | no |
 | <a name="input_rad-security_assumed_role_arn"></a> [rad-security\_assumed\_role\_arn](#input\_rad-security\_assumed\_role\_arn) | Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account | `string` | `"arn:aws:iam::955322216602:role/rad-security-connector"` | no |
 | <a name="input_rad-security_deprecated_assumed_role_arn"></a> [rad-security\_deprecated\_assumed\_role\_arn](#input\_rad-security\_deprecated\_assumed\_role\_arn) | Deprecated Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account. This role will be removed in the future. | `string` | `"arn:aws:iam::955322216602:role/ksoc-connector"` | no |
 | <a name="input_rad-security_eks_audit_logs_assumed_role_arn"></a> [rad-security\_eks\_audit\_logs\_assumed\_role\_arn](#input\_rad-security\_eks\_audit\_logs\_assumed\_role\_arn) | Rad Security Role dedicated for EKS audit logs that will be allowed to assume | `string` | `"arn:aws:iam::955322216602:role/ksoc-data-pipeline"` | no |
+| <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | Enable this if running in a another region. It will disable the creation of global resources. | `bool` | `false` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A set of tags to associate with the resources in this module. | `map(string)` | `{}` | no |
 
 ## Outputs
@@ -102,6 +104,7 @@ No modules.
 | <a name="output_eks_audit_logs_cloudwatch_iam_role_arn"></a> [eks\_audit\_logs\_cloudwatch\_iam\_role\_arn](#output\_eks\_audit\_logs\_cloudwatch\_iam\_role\_arn) | AWS IAM Role ARN for Cloudwatch to Firehose |
 | <a name="output_eks_audit_logs_filter_pattern"></a> [eks\_audit\_logs\_filter\_pattern](#output\_eks\_audit\_logs\_filter\_pattern) | The Cloudwatch Log Subscription Filter pattern |
 | <a name="output_eks_audit_logs_firehose_arn"></a> [eks\_audit\_logs\_firehose\_arn](#output\_eks\_audit\_logs\_firehose\_arn) | The Firehose delivery stream ARN |
+| <a name="output_eks_audit_logs_firehose_iam_role_arn"></a> [eks\_audit\_logs\_firehose\_iam\_role\_arn](#output\_eks\_audit\_logs\_firehose\_iam\_role\_arn) | AWS IAM Role ARN for Firehose to S3 |
 | <a name="output_role_arn"></a> [role\_arn](#output\_role\_arn) | AWS IAM Role ARN which Rad Security uses to connect |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
