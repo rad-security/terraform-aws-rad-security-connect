@@ -46,13 +46,13 @@ variable "secondary_region" {
   default     = false
 }
 
-variable "firehose_role_arn" {
+variable "eks_audit_log_firehose_role_arn" {
   type        = string
-  description = "The ARN of the IAM role that will be used to write to the Firehose"
+  description = "The ARN of the IAM role that will be used to write to the Firehose. Required for secondary regions."
   default     = ""
 }
 
-variable "cloudwatch_role_arn" {
+variable "eks_audit_log_cloudwatch_role_arn" {
   type        = string
   description = "The ARN of the IAM role that CloudWatch Logs will use to send data to the Firehose. Required for secondary regions."
   default     = ""
