@@ -20,7 +20,7 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
   tags        = var.tags
 
   extended_s3_configuration {
-    role_arn   = var.eks_audit_log_firehose_role_arn != "" ? var.eks_audit_log_firehose_role_arn : one(aws_iam_role.firehose[*].arn)
+    role_arn   = var.eks_audit_log_firehose_role_arn != "" ? var.eks_audit_log_firehose_role_arn : aws_iam_role.firehose[0].arn
     bucket_arn = aws_s3_bucket.audit_logs[0].arn
 
     buffering_interval = 60
@@ -142,7 +142,7 @@ resource "aws_cloudwatch_log_subscription_filter" "subscription_filter" {
   } : {}
 
   name            = "ksoc-audit-logs"
-  role_arn        = var.eks_audit_log_cloudwatch_role_arn != "" ? var.eks_audit_log_cloudwatch_role_arn : one(aws_iam_role.cloudwatch[*].arn)
+  role_arn        = var.eks_audit_log_cloudwatch_role_arn != "" ? var.eks_audit_log_cloudwatch_role_arn : aws_iam_role.cloudwatch[0].arn
   log_group_name  = each.key
   filter_pattern  = var.eks_audit_logs_filter_pattern
   destination_arn = aws_kinesis_firehose_delivery_stream.firehose[0].arn
