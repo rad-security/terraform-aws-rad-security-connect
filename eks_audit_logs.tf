@@ -1,6 +1,7 @@
 locals {
-  bucket_name = "ksoc-eks-${random_id.uniq.hex}"
-  regions     = [for region in var.eks_audit_logs_regions : "logs.${region}.amazonaws.com"]
+  bucket_name   = "ksoc-eks-${random_id.uniq.hex}"
+  regions       = [for region in var.eks_audit_logs_regions : "logs.${region}.amazonaws.com"]
+  firehose_name = "ksoc-audit-logs"
 }
 
 resource "random_id" "uniq" {
@@ -14,7 +15,7 @@ data "aws_cloudwatch_log_groups" "eks" {
 
 resource "aws_kinesis_firehose_delivery_stream" "firehose" {
   count       = var.enable_eks_audit_logs_pipeline ? 1 : 0
-  name        = "ksoc-audit-logs"
+  name        = local.firehose_name
   destination = "extended_s3"
   tags        = var.tags
 
@@ -121,10 +122,9 @@ data "aws_iam_policy_document" "logs_to_firehose" {
   statement {
     effect    = "Allow"
     actions   = ["firehose:PutRecord"]
-    resources = [aws_kinesis_firehose_delivery_stream.firehose[0].arn]
+    resources = ["arn:aws:firehose:*:${data.aws_caller_identity.current.account_id}:deliverystream/${local.firehose_name}"]
   }
 }
-
 resource "aws_iam_role" "cloudwatch" {
   count              = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   name               = "ksoc-cloudwatch-logs"
