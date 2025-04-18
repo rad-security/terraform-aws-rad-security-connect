@@ -1,6 +1,5 @@
 locals {
   bucket_name   = "ksoc-eks-${random_id.uniq.hex}"
-  regions       = [for region in var.eks_audit_logs_regions : "logs.${region}.amazonaws.com"]
   firehose_name = "ksoc-audit-logs"
 }
 
@@ -110,7 +109,7 @@ data "aws_iam_policy_document" "cloudwatch_assume" {
 
     principals {
       type        = "Service"
-      identifiers = local.regions
+      identifiers = ["logs.*.amazonaws.com"]
     }
 
     actions = ["sts:AssumeRole"]
