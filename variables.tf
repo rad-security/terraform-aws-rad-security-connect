@@ -34,16 +34,22 @@ variable "eks_audit_logs_filter_pattern" {
   description = "The Cloudwatch Log Subscription Filter pattern"
 }
 
-variable "eks_audit_logs_regions" {
-  type        = list(string)
-  default     = ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]
-  description = "Regions from which Cloudwatch will be allowed to send logs to the Firehose"
+variable "secondary_region" {
+  type        = bool
+  description = "Enable this if running in a another region. It will disable the creation of global resources."
+  default     = false
 }
 
-variable "eks_audit_logs_multi_region" {
-  type        = bool
-  default     = false
-  description = "Enable multi-region support for the EKS audit logs. This requires creating subscription filters in each region outside of this module. See documentation for more information."
+variable "eks_audit_log_firehose_role_arn" {
+  type        = string
+  description = "The ARN of the IAM role that will be used to write to the Firehose. Required for secondary regions."
+  default     = ""
+}
+
+variable "eks_audit_log_cloudwatch_role_arn" {
+  type        = string
+  description = "The ARN of the IAM role that CloudWatch Logs will use to send data to the Firehose. Required for secondary regions."
+  default     = ""
 }
 
 variable "tags" {
