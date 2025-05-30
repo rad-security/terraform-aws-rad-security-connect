@@ -82,11 +82,20 @@ data "aws_iam_policy_document" "firehose_to_s3" {
   count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect = "Allow"
+
     actions = [
-      "s3:AbortMultipartUpload", "s3:GetBucketLocation", "s3:GetObject", "s3:ListBucket",
-      "s3:ListBucketMultipartUploads", "s3:PutObject"
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject"
     ]
-    resources = [aws_s3_bucket.audit_logs[0].arn, "${aws_s3_bucket.audit_logs[0].arn}/*"]
+
+    resources = [
+      "arn:aws:s3:::ksoc-eks-*",
+      "arn:aws:s3:::ksoc-eks-*/*",
+    ]
   }
 }
 
