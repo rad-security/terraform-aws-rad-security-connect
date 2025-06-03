@@ -163,9 +163,14 @@ data "aws_iam_policy_document" "ksoc_s3_access" {
   statement {
     effect = "Allow"
     actions = [
-      "s3:GetObject", "s3:ListBucket"
+      "s3:ListBucket",
+      "s3:GetObject"
     ]
-    resources = [aws_s3_bucket.audit_logs[0].arn, "${aws_s3_bucket.audit_logs[0].arn}/*"]
+
+    resources = [
+      "arn:aws:s3:::ksoc-eks-*",
+      "arn:aws:s3:::ksoc-eks-*/*",
+    ]
   }
 }
 
