@@ -82,7 +82,6 @@ data "aws_iam_policy_document" "firehose_to_s3" {
   count = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   statement {
     effect = "Allow"
-
     actions = [
       "s3:AbortMultipartUpload",
       "s3:GetBucketLocation",
@@ -91,7 +90,6 @@ data "aws_iam_policy_document" "firehose_to_s3" {
       "s3:ListBucketMultipartUploads",
       "s3:PutObject"
     ]
-
     resources = [
       "arn:aws:s3:::ksoc-eks-*",
       "arn:aws:s3:::ksoc-eks-*/*",
@@ -104,11 +102,14 @@ resource "aws_iam_role" "firehose" {
   count              = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   name               = "ksoc-firehose"
   assume_role_policy = data.aws_iam_policy_document.firehose_assume[0].json
-  inline_policy {
-    name   = "ksoc-firehose-to-s3-policy"
-    policy = data.aws_iam_policy_document.firehose_to_s3[0].json
-  }
-  tags = var.tags
+  tags               = var.tags
+}
+
+resource "aws_iam_role_policy" "firehose_to_s3" {
+  count  = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
+  name   = "ksoc-firehose-to-s3-policy"
+  role   = aws_iam_role.firehose[0].id
+  policy = data.aws_iam_policy_document.firehose_to_s3[0].json
 }
 
 data "aws_iam_policy_document" "cloudwatch_assume" {
@@ -137,11 +138,14 @@ resource "aws_iam_role" "cloudwatch" {
   count              = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
   name               = "ksoc-cloudwatch-logs"
   assume_role_policy = data.aws_iam_policy_document.cloudwatch_assume[0].json
-  inline_policy {
-    name   = "ksoc-cloudwatch-logs-to-firehose-policy"
-    policy = data.aws_iam_policy_document.logs_to_firehose[0].json
-  }
-  tags = var.tags
+  tags               = var.tags
+}
+
+resource "aws_iam_role_policy" "cloudwatch_to_firehose" {
+  count  = var.enable_eks_audit_logs_pipeline && !var.secondary_region ? 1 : 0
+  name   = "ksoc-cloudwatch-logs-to-firehose-policy"
+  role   = aws_iam_role.cloudwatch[0].id
+  policy = data.aws_iam_policy_document.logs_to_firehose[0].json
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "subscription_filter" {
@@ -163,10 +167,9 @@ data "aws_iam_policy_document" "ksoc_s3_access" {
   statement {
     effect = "Allow"
     actions = [
-      "s3:ListBucket",
-      "s3:GetObject"
+      "s3:GetObject",
+      "s3:ListBucket"
     ]
-
     resources = [
       "arn:aws:s3:::ksoc-eks-*",
       "arn:aws:s3:::ksoc-eks-*/*",
