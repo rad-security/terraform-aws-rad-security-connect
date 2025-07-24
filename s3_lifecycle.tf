@@ -9,15 +9,15 @@ resource "aws_s3_bucket_lifecycle_configuration" "audit_logs" {
     filter {}
 
     expiration {
-      days = 7
+      days = var.eks_audit_logs_bucket_object_age
     }
 
     noncurrent_version_expiration {
-      noncurrent_days = 7
+      noncurrent_days = var.eks_audit_logs_bucket_object_age
     }
 
     abort_incomplete_multipart_upload {
-      days_after_initiation = 7
+      days_after_initiation = var.eks_audit_logs_bucket_object_age
     }
   }
 }

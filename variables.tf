@@ -22,6 +22,12 @@ variable "eks_audit_logs_bucket_versioning_enabled" {
   default     = true
 }
 
+variable "eks_audit_logs_bucket_object_age" {
+  type        = number
+  description = "The number of days to retain the objects in the S3 bucket that will store EKS audit logs"
+  default     = 7
+}
+
 variable "rad-security_eks_audit_logs_assumed_role_arn" {
   type        = string
   description = "Rad Security Role dedicated for EKS audit logs that will be allowed to assume"
