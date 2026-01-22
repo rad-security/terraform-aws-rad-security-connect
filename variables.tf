@@ -65,7 +65,13 @@ variable "tags" {
 }
 
 variable "aws_external_id" {
-  description = "External ID to use when connecting an AWS account with Rad"
+  description = "External ID to use when connecting an AWS account with RAD Security"
   type        = string
   default     = ""
+}
+
+variable "readonly_s3_buckets" {
+  description = "List of S3 buckets containing logs (CloudTrail, VPC flow logs, etc.) that RAD Security will be allowed to read"
+  type        = list(string)
+  default     = []
 }

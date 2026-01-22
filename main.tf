@@ -50,3 +50,69 @@ resource "rad-security_aws_register" "this" {
   rad_security_assumed_role_arn = var.rad-security_assumed_role_arn
   aws_account_id                = data.aws_caller_identity.current.account_id
 }
+
+resource "aws_s3_bucket_lifecycle_configuration" "audit_logs" {
+  count  = var.enable_eks_audit_logs_pipeline ? 1 : 0
+  bucket = aws_s3_bucket.audit_logs[0].bucket
+
+  rule {
+    id     = "delete-old-objects"
+    status = "Enabled"
+
+    filter {}
+
+    expiration {
+      days = var.eks_audit_logs_bucket_object_age
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = var.eks_audit_logs_bucket_object_age
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = var.eks_audit_logs_bucket_object_age
+    }
+  }
+}
+
+locals {
+  readonly_s3_buckets_enabled = !var.secondary_region && length(var.readonly_s3_buckets) > 0
+}
+
+data "aws_iam_policy_document" "readonly_s3_buckets_access" {
+  count = local.readonly_s3_buckets_enabled ? 1 : 0
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+    ]
+    resources = [for bucket in var.readonly_s3_buckets : "arn:aws:s3:::${bucket}"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+    ]
+    resources = [for bucket in var.readonly_s3_buckets : "arn:aws:s3:::${bucket}/*"]
+  }
+}
+
+resource "aws_iam_policy" "readonly_s3_buckets_access" {
+  count = local.readonly_s3_buckets_enabled ? 1 : 0
+
+  name        = "rad-security-readonly-s3-buckets-access"
+  path        = "/"
+  description = "Policy to allow Rad Security to read logs from specified S3 buckets"
+  policy      = data.aws_iam_policy_document.readonly_s3_buckets_access[0].json
+  tags        = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "readonly_s3_buckets_access" {
+  count = local.readonly_s3_buckets_enabled ? 1 : 0
+
+  role       = aws_iam_role.this[0].name
+  policy_arn = aws_iam_policy.readonly_s3_buckets_access[0].arn
+}
