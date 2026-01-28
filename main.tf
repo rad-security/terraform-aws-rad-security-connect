@@ -5,12 +5,11 @@ data "aws_iam_policy_document" "assume_role" {
     effect = "Allow"
     actions = [
       "sts:AssumeRole",
-      "sts:TagSession"
     ]
 
     principals {
       type        = "AWS"
-      identifiers = [var.rad-security_assumed_role_arn, var.rad-security_deprecated_assumed_role_arn]
+      identifiers = [var.rad-security_assumed_role_arn]
     }
 
     dynamic "condition" {
@@ -20,6 +19,18 @@ data "aws_iam_policy_document" "assume_role" {
         variable = "sts:ExternalId"
         values   = [condition.value]
       }
+    }
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:TagSession"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = [var.rad-security_assumed_role_arn]
     }
   }
 }
