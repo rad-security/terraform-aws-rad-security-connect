@@ -18,6 +18,10 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
   destination = "extended_s3"
   tags        = var.tags
 
+  server_side_encryption {
+    enabled = true
+  }
+
   extended_s3_configuration {
     role_arn   = var.eks_audit_log_firehose_role_arn != "" ? var.eks_audit_log_firehose_role_arn : aws_iam_role.firehose[0].arn
     bucket_arn = aws_s3_bucket.audit_logs[0].arn
