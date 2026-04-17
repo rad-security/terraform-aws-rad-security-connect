@@ -260,6 +260,7 @@ locals {
     "iam:ListVirtualMFADevices",
     "inspector2:DescribeOrganizationConfiguration",
     "inspector2:ListCoverage",
+    "inspector2:ListFindings",
     "inspector:ListFindings",
     "kafka:DescribeConfiguration",
     "kafka:GetBootstrapBrokers",
