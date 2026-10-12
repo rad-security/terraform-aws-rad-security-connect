@@ -32,7 +32,7 @@ Also, only clusters in the same region as your AWS provider will be included in 
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.8 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0.0 |
 | <a name="requirement_rad-security"></a> [rad-security](#requirement\_rad-security) | >= 1.0.3 |
@@ -40,7 +40,7 @@ Also, only clusters in the same region as your AWS provider will be included in 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0.0 |
 | <a name="provider_rad-security"></a> [rad-security](#provider\_rad-security) | >= 1.0.3 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
@@ -52,7 +52,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_subscription_filter.subscription_filter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_subscription_filter) | resource |
 | [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_policy.connect_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -89,7 +89,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_external_id"></a> [aws\_external\_id](#input\_aws\_external\_id) | External ID to use when connecting an AWS account with RAD Security | `string` | `""` | no |
 | <a name="input_eks_audit_log_cloudwatch_role_arn"></a> [eks\_audit\_log\_cloudwatch\_role\_arn](#input\_eks\_audit\_log\_cloudwatch\_role\_arn) | The ARN of the IAM role that CloudWatch Logs will use to send data to the Firehose. Required for secondary regions. | `string` | `""` | no |
 | <a name="input_eks_audit_log_firehose_role_arn"></a> [eks\_audit\_log\_firehose\_role\_arn](#input\_eks\_audit\_log\_firehose\_role\_arn) | The ARN of the IAM role that will be used to write to the Firehose. Required for secondary regions. | `string` | `""` | no |
@@ -107,7 +107,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_eks_audit_logs_cloudwatch_iam_role_arn"></a> [eks\_audit\_logs\_cloudwatch\_iam\_role\_arn](#output\_eks\_audit\_logs\_cloudwatch\_iam\_role\_arn) | AWS IAM Role ARN for Cloudwatch to Firehose |
 | <a name="output_eks_audit_logs_filter_pattern"></a> [eks\_audit\_logs\_filter\_pattern](#output\_eks\_audit\_logs\_filter\_pattern) | The Cloudwatch Log Subscription Filter pattern |
 | <a name="output_eks_audit_logs_firehose_arn"></a> [eks\_audit\_logs\_firehose\_arn](#output\_eks\_audit\_logs\_firehose\_arn) | The Firehose delivery stream ARN |
