@@ -9,14 +9,11 @@ jobs:
    permissions:
      contents: read
    runs-on: ubuntu-latest
+   container: public.ecr.aws/n8h5y2v5/rad-security/terraform-toolkit:1
    steps:
      - name: clone repo
        uses: actions/checkout@v4
-     # Run the toolkit with docker instead of as a job container: the runner
-     # executes JavaScript actions such as checkout on Node 24, which fails on
-     # the toolkit's Alpine 3.12 base.
      - name: pre-commit checks
        run: |
-         docker run --rm -v "$PWD:/src" -w /src --entrypoint sh \
-           ksoc/terraform-toolkit:1.0.8 \
-           -c 'git config --global --add safe.directory /src && pre-commit-checks'
+         git config --global --add safe.directory "$GITHUB_WORKSPACE"
+         pre-commit-checks
