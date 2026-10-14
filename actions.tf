@@ -201,6 +201,7 @@ locals {
     "ecr:GetRepositoryPolicy",
     "ecr:ListTagsForResource",
     "ecs:DescribeClusters",
+    "ecs:DescribeContainerInstances",
     "ecs:DescribeServices",
     "ecs:DescribeTaskDefinition",
     "ecs:DescribeTasks",
