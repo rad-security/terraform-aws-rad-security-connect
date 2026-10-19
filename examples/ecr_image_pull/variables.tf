@@ -1,9 +1,15 @@
-variable "ksoc_access_key_id" {
+variable "rad_access_key_id" {
   type        = string
-  description = "KSOC API key"
+  description = "RAD Security API access key ID"
 }
 
-variable "ksoc_secret_key" {
+variable "rad_secret_key" {
   type        = string
-  description = "KSOC API secret"
+  description = "RAD Security API secret key"
+  sensitive   = true
+}
+
+variable "aws_region" {
+  type        = string
+  description = "AWS region where the module is applied"
 }

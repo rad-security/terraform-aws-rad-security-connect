@@ -1,19 +1,10 @@
-terraform {
-  required_providers {
-    rad-security = {
-      source  = "rad-security/rad-security"
-      version = "1.0.3"
-    }
-  }
-}
-
 provider "aws" {
-  region = "us-west-2"
+  region = var.aws_region
 }
 
 provider "rad-security" {
-  access_key_id = var.ksoc_access_key_id
-  secret_key    = var.ksoc_secret_key
+  access_key_id = var.rad_access_key_id
+  secret_key    = var.rad_secret_key
 }
 
 module "rad-security-connect" {
