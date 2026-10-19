@@ -127,3 +127,45 @@ resource "aws_iam_role_policy_attachment" "readonly_s3_buckets_access" {
   role       = aws_iam_role.this[0].name
   policy_arn = aws_iam_policy.readonly_s3_buckets_access[0].arn
 }
+
+locals {
+  ecr_image_pull_enabled = !var.secondary_region && var.enable_ecr_image_pull
+}
+
+data "aws_iam_policy_document" "ecr_image_pull" {
+  count = local.ecr_image_pull_enabled ? 1 : 0
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:GetAuthorizationToken",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+    ]
+    resources = var.ecr_repository_arns
+  }
+}
+
+resource "aws_iam_policy" "ecr_image_pull" {
+  count = local.ecr_image_pull_enabled ? 1 : 0
+
+  name        = "rad-security-ecr-image-pull"
+  path        = "/"
+  description = "Policy to allow Rad Security to pull container images from ECR for SBOM generation and vulnerability scanning"
+  policy      = data.aws_iam_policy_document.ecr_image_pull[0].json
+  tags        = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_image_pull" {
+  count = local.ecr_image_pull_enabled ? 1 : 0
+
+  role       = aws_iam_role.this[0].name
+  policy_arn = aws_iam_policy.ecr_image_pull[0].arn
+}
