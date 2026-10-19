@@ -75,3 +75,15 @@ variable "readonly_s3_buckets" {
   type        = list(string)
   default     = []
 }
+
+variable "enable_ecr_image_pull" {
+  description = "Allow RAD Security to pull container images from ECR in this account, so it can generate SBOMs and scan images running in ECS/Fargate"
+  type        = bool
+  default     = false
+}
+
+variable "ecr_repository_arns" {
+  description = "ECR repository ARNs RAD Security is allowed to pull images from when enable_ecr_image_pull is true. Defaults to all repositories in the account"
+  type        = list(string)
+  default     = ["*"]
+}

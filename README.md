@@ -28,6 +28,15 @@ There is an optional flag `enable_eks_audit_logs_pipeline` which will create a C
 
 Also, only clusters in the same region as your AWS provider will be included in the pipeline. If you have EKS clusters in multiple regions, you need to enable `eks_audit_logs_multi_region` flag and create subscription filters in each region outside of this module (see example in the [examples/audit_logs_multi_region](https://github.com/rad-security/terraform-aws-rad-security-connect/tree/main/examples/audit_logs_multi_region) directory).
 
+### ECR Image Pull (ECS / Fargate image scanning)
+
+Rad Security discovers the images running in your ECS tasks (including Fargate) by digest. To generate SBOMs and scan those images for vulnerabilities, it needs read-only access to pull them from ECR. Set `enable_ecr_image_pull = true` to attach a `rad-security-ecr-image-pull` policy to the `rad-security-connect` role with `ecr:GetAuthorizationToken`, `ecr:BatchGetImage` and `ecr:GetDownloadUrlForLayer`. Only images that are actually running are pulled. Use `ecr_repository_arns` to limit access to selected repositories (see [examples/ecr_image_pull](https://github.com/rad-security/terraform-aws-rad-security-connect/tree/main/examples/ecr_image_pull)).
+
+If your images are stored in a central ECR account, either:
+
+- **Connect the central ECR account (recommended).** Apply this module in the central account with `enable_ecr_image_pull = true`. Rad Security pulls each image using the role in the account that owns the registry.
+- **Use a repository policy.** Grant each workload account's `rad-security-connect` role (module output `role_arn`) `ecr:BatchGetImage` and `ecr:GetDownloadUrlForLayer` in the central repositories' policy, and enable `enable_ecr_image_pull` in the workload accounts.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
@@ -56,6 +65,7 @@ No modules.
 | [aws_cloudwatch_log_subscription_filter.subscription_filter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_subscription_filter) | resource |
 | [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_policy.connect_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ecr_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ksoc_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.readonly_s3_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -64,6 +74,7 @@ No modules.
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.cloudwatch_to_firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.firehose_to_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.ecr_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ksoc_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.rad-security_connect_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.readonly_s3_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -79,6 +90,7 @@ No modules.
 | [aws_cloudwatch_log_groups.eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/cloudwatch_log_groups) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cloudwatch_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.ecr_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.firehose_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.firehose_to_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.ksoc_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -91,11 +103,13 @@ No modules.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_external_id"></a> [aws\_external\_id](#input\_aws\_external\_id) | External ID to use when connecting an AWS account with RAD Security | `string` | `""` | no |
+| <a name="input_ecr_repository_arns"></a> [ecr\_repository\_arns](#input\_ecr\_repository\_arns) | ECR repository ARNs RAD Security is allowed to pull images from when enable\_ecr\_image\_pull is true. Defaults to all repositories in the account | `list(string)` | <pre>[<br/>  "*"<br/>]</pre> | no |
 | <a name="input_eks_audit_log_cloudwatch_role_arn"></a> [eks\_audit\_log\_cloudwatch\_role\_arn](#input\_eks\_audit\_log\_cloudwatch\_role\_arn) | The ARN of the IAM role that CloudWatch Logs will use to send data to the Firehose. Required for secondary regions. | `string` | `""` | no |
 | <a name="input_eks_audit_log_firehose_role_arn"></a> [eks\_audit\_log\_firehose\_role\_arn](#input\_eks\_audit\_log\_firehose\_role\_arn) | The ARN of the IAM role that will be used to write to the Firehose. Required for secondary regions. | `string` | `""` | no |
 | <a name="input_eks_audit_logs_bucket_object_age"></a> [eks\_audit\_logs\_bucket\_object\_age](#input\_eks\_audit\_logs\_bucket\_object\_age) | The number of days to retain the objects in the S3 bucket that will store EKS audit logs | `number` | `7` | no |
 | <a name="input_eks_audit_logs_bucket_versioning_enabled"></a> [eks\_audit\_logs\_bucket\_versioning\_enabled](#input\_eks\_audit\_logs\_bucket\_versioning\_enabled) | Enable versioning for the S3 bucket that will store EKS audit logs | `bool` | `true` | no |
 | <a name="input_eks_audit_logs_filter_pattern"></a> [eks\_audit\_logs\_filter\_pattern](#input\_eks\_audit\_logs\_filter\_pattern) | The Cloudwatch Log Subscription Filter pattern | `string` | `"{ $.stage = \"ResponseComplete\" && $.requestURI != \"/version\" && $.requestURI != \"/version?*\" && $.requestURI != \"/metrics\" && $.requestURI != \"/metrics?*\" && $.requestURI != \"/logs\" && $.requestURI != \"/logs?*\" && $.requestURI != \"/swagger*\" && $.requestURI != \"/livez*\" && $.requestURI != \"/readyz*\" && $.requestURI != \"/healthz*\" }"` | no |
+| <a name="input_enable_ecr_image_pull"></a> [enable\_ecr\_image\_pull](#input\_enable\_ecr\_image\_pull) | Allow RAD Security to pull container images from ECR in this account, so it can generate SBOMs and scan images running in ECS/Fargate | `bool` | `false` | no |
 | <a name="input_enable_eks_audit_logs_pipeline"></a> [enable\_eks\_audit\_logs\_pipeline](#input\_enable\_eks\_audit\_logs\_pipeline) | Enable EKS Audit Logs Pipeline (CloudWatch Logs -> FireHose -> S3) | `bool` | `false` | no |
 | <a name="input_rad-security_assumed_role_arn"></a> [rad-security\_assumed\_role\_arn](#input\_rad-security\_assumed\_role\_arn) | Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account | `string` | `"arn:aws:iam::955322216602:role/rad-security-connector"` | no |
 | <a name="input_rad-security_deprecated_assumed_role_arn"></a> [rad-security\_deprecated\_assumed\_role\_arn](#input\_rad-security\_deprecated\_assumed\_role\_arn) | Deprecated Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account. This role will be removed in the future. | `string` | `"arn:aws:iam::955322216602:role/ksoc-connector"` | no |
@@ -122,7 +136,7 @@ Apache 2 Licensed. See [LICENSE](LICENSE) for full details.
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.8 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0.0 |
 | <a name="requirement_rad-security"></a> [rad-security](#requirement\_rad-security) | >= 1.0.3 |
@@ -130,7 +144,7 @@ Apache 2 Licensed. See [LICENSE](LICENSE) for full details.
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0.0 |
 | <a name="provider_rad-security"></a> [rad-security](#provider\_rad-security) | >= 1.0.3 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
@@ -142,21 +156,23 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_subscription_filter.subscription_filter](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_subscription_filter) | resource |
 | [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_policy.connect_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ecr_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ksoc_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.log_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.readonly_s3_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.ksoc_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.cloudwatch_to_firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.firehose_to_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.ecr_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ksoc_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.log_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.rad-security_connect_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.readonly_s3_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_kinesis_firehose_delivery_stream.firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kinesis_firehose_delivery_stream) | resource |
 | [aws_s3_bucket.audit_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_lifecycle_configuration.audit_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
@@ -169,35 +185,38 @@ No modules.
 | [aws_cloudwatch_log_groups.eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/cloudwatch_log_groups) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.cloudwatch_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.ecr_image_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.firehose_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.firehose_to_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.ksoc_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.ksoc_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.log_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.logs_to_firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.readonly_s3_buckets_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_aws_external_id"></a> [aws\_external\_id](#input\_aws\_external\_id) | External ID to use when connecting an AWS account with RAD Security | `string` | `""` | no |
+| <a name="input_ecr_repository_arns"></a> [ecr\_repository\_arns](#input\_ecr\_repository\_arns) | ECR repository ARNs RAD Security is allowed to pull images from when enable\_ecr\_image\_pull is true. Defaults to all repositories in the account | `list(string)` | <pre>[<br/>  "*"<br/>]</pre> | no |
 | <a name="input_eks_audit_log_cloudwatch_role_arn"></a> [eks\_audit\_log\_cloudwatch\_role\_arn](#input\_eks\_audit\_log\_cloudwatch\_role\_arn) | The ARN of the IAM role that CloudWatch Logs will use to send data to the Firehose. Required for secondary regions. | `string` | `""` | no |
 | <a name="input_eks_audit_log_firehose_role_arn"></a> [eks\_audit\_log\_firehose\_role\_arn](#input\_eks\_audit\_log\_firehose\_role\_arn) | The ARN of the IAM role that will be used to write to the Firehose. Required for secondary regions. | `string` | `""` | no |
 | <a name="input_eks_audit_logs_bucket_object_age"></a> [eks\_audit\_logs\_bucket\_object\_age](#input\_eks\_audit\_logs\_bucket\_object\_age) | The number of days to retain the objects in the S3 bucket that will store EKS audit logs | `number` | `7` | no |
 | <a name="input_eks_audit_logs_bucket_versioning_enabled"></a> [eks\_audit\_logs\_bucket\_versioning\_enabled](#input\_eks\_audit\_logs\_bucket\_versioning\_enabled) | Enable versioning for the S3 bucket that will store EKS audit logs | `bool` | `true` | no |
 | <a name="input_eks_audit_logs_filter_pattern"></a> [eks\_audit\_logs\_filter\_pattern](#input\_eks\_audit\_logs\_filter\_pattern) | The Cloudwatch Log Subscription Filter pattern | `string` | `"{ $.stage = \"ResponseComplete\" && $.requestURI != \"/version\" && $.requestURI != \"/version?*\" && $.requestURI != \"/metrics\" && $.requestURI != \"/metrics?*\" && $.requestURI != \"/logs\" && $.requestURI != \"/logs?*\" && $.requestURI != \"/swagger*\" && $.requestURI != \"/livez*\" && $.requestURI != \"/readyz*\" && $.requestURI != \"/healthz*\" }"` | no |
+| <a name="input_enable_ecr_image_pull"></a> [enable\_ecr\_image\_pull](#input\_enable\_ecr\_image\_pull) | Allow RAD Security to pull container images from ECR in this account, so it can generate SBOMs and scan images running in ECS/Fargate | `bool` | `false` | no |
 | <a name="input_enable_eks_audit_logs_pipeline"></a> [enable\_eks\_audit\_logs\_pipeline](#input\_enable\_eks\_audit\_logs\_pipeline) | Enable EKS Audit Logs Pipeline (CloudWatch Logs -> FireHose -> S3) | `bool` | `false` | no |
-| <a name="input_log_buckets"></a> [log\_buckets](#input\_log\_buckets) | List of S3 buckets containing logs (CloudTrail, VPN flow logs, WAF logs, etc.) that Rad Security will be allowed to read | `list(string)` | `[]` | no |
 | <a name="input_rad-security_assumed_role_arn"></a> [rad-security\_assumed\_role\_arn](#input\_rad-security\_assumed\_role\_arn) | Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account | `string` | `"arn:aws:iam::955322216602:role/rad-security-connector"` | no |
 | <a name="input_rad-security_deprecated_assumed_role_arn"></a> [rad-security\_deprecated\_assumed\_role\_arn](#input\_rad-security\_deprecated\_assumed\_role\_arn) | Deprecated Rad Security Role that will assume the rad-security-connect IAM role you create to interact with resources in your account. This role will be removed in the future. | `string` | `"arn:aws:iam::955322216602:role/ksoc-connector"` | no |
 | <a name="input_rad-security_eks_audit_logs_assumed_role_arn"></a> [rad-security\_eks\_audit\_logs\_assumed\_role\_arn](#input\_rad-security\_eks\_audit\_logs\_assumed\_role\_arn) | Rad Security Role dedicated for EKS audit logs that will be allowed to assume | `string` | `"arn:aws:iam::955322216602:role/ksoc-data-pipeline"` | no |
+| <a name="input_readonly_s3_buckets"></a> [readonly\_s3\_buckets](#input\_readonly\_s3\_buckets) | List of S3 buckets containing logs (CloudTrail, VPC flow logs, etc.) that RAD Security will be allowed to read | `list(string)` | `[]` | no |
 | <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | Enable this if running in a another region. It will disable the creation of global resources. | `bool` | `false` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A set of tags to associate with the resources in this module. | `map(string)` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_eks_audit_logs_cloudwatch_iam_role_arn"></a> [eks\_audit\_logs\_cloudwatch\_iam\_role\_arn](#output\_eks\_audit\_logs\_cloudwatch\_iam\_role\_arn) | AWS IAM Role ARN for Cloudwatch to Firehose |
 | <a name="output_eks_audit_logs_filter_pattern"></a> [eks\_audit\_logs\_filter\_pattern](#output\_eks\_audit\_logs\_filter\_pattern) | The Cloudwatch Log Subscription Filter pattern |
 | <a name="output_eks_audit_logs_firehose_arn"></a> [eks\_audit\_logs\_firehose\_arn](#output\_eks\_audit\_logs\_firehose\_arn) | The Firehose delivery stream ARN |
