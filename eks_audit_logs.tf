@@ -79,6 +79,13 @@ data "aws_iam_policy_document" "firehose_assume" {
     }
 
     actions = ["sts:AssumeRole"]
+
+    # Confused-deputy protection: only Firehose acting for this account.
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
   }
 }
 
@@ -127,6 +134,14 @@ data "aws_iam_policy_document" "cloudwatch_assume" {
     }
 
     actions = ["sts:AssumeRole"]
+
+    # Confused-deputy protection: only CloudWatch Logs subscriptions of this
+    # account, in any region (secondary regions reuse this role).
+    condition {
+      test     = "StringLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:logs:*:${data.aws_caller_identity.current.account_id}:*"]
+    }
   }
 }
 
